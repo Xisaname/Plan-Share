@@ -5,4 +5,4 @@
 
 - Upload Method
 
-大家自行Fork，pull之后我会定期合并。
+大家自行Fork，推送代码到远程分支后我会定期合并。
