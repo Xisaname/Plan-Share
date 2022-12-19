@@ -52,7 +52,7 @@
 
 - 设$\mathbb{H}=\left\{\left(z_j\right)_{j \in \mathbb{Z}_M^*}: z_{-j}=\overline{z_j}, \forall j \in \mathbb{Z}_M^*\right\} \subseteq \mathbb{C}^{\Phi(M)}$
 
-  令T是乘法组$\mathbb{Z}_M^*$的一个子组，满足$\mathbb{Z}_M^* / T=\{\pm 1\}$
+  令T是乘法组$\mathbb{Z}_M^*$ 的一个子组，满足$\mathbb{Z}_M^* / T=\{\pm 1\}$
 
   方案的原生明文空间是环形环$\mathcal{R}=\mathbb{Z}[X] /\left(\Phi_M(X)\right)$中的多项式集合，其大小由密码文模数决定。
 
