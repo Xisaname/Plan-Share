@@ -1,2 +1,2 @@
-papers:论文
+papers：论文
 plan：计划
