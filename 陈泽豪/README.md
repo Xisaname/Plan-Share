@@ -1,5 +1,5 @@
 #### 第一周计划 12/19 - 12/26
-	- 研究一下Data dedup源码
-	- 看一看FileBench怎么用
+	- 研究一下Data dedup源码（各大论文一般都是基于这个东西做的实验）
+	- 看一看FileBench怎么用（这个一般用来做data dedup的benchmark，来产出不同类型的块大小以并附带不同读写更新比例）
 	- 修改之前的论文改投ATC
 	
