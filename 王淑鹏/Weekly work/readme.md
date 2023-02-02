@@ -15,3 +15,15 @@
 + 两门课程报告均已完成
 + 论文阅读4页
 
+## 第三周(2023.01.02-2023.01.08)
+### 任务：
++ 论文《HyperEnclave: An Open and Cross-platform Trusted Execution Environment》
+### 完成度
++ 拿到树莓派
++ 论文读完
+
+## 第四周(2023.01.09-2023.01.15)
+### 完成任务：
++ 论文《CRONUS_Fault-isolated_Secure_and_High-performance_Heterogeneous_Computing_for_Trusted_Execution_Environment》
++ 树莓派开箱调试
+
