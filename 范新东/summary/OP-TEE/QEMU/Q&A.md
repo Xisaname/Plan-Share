@@ -19,3 +19,5 @@ echo "export set FORCE_UNSAFE_CONFIGURE=1"
 source /etc/profile
 ```
 但是我用了上述方法不行，可能还需要重启。但是我用了临时的方法，即在执行make指令时，直接在make字段后添加`FORCE_UNSAFE_CONFIGURE=1`，这样就可以保证本次make指令不会出现上述错误。
+
+# 运行问题(qemu7.2.0+optee)
