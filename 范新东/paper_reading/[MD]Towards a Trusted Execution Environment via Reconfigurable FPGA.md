@@ -1,6 +1,6 @@
 # Towards a Trusted Execution Environment via Reconfigurable FPGA
 
-# 背景
+# 概述
 以往的可信执行环境中的安全元素被滥用，这本身降低了其安全性。因此本文提出了一种**按需可信执行环境(Trusted Execution Environment On-Demand, TEEOD)**。该TEE可以提供高带宽连接和物理片上隔离。
 
 ## 现有TEE的弱点
@@ -114,4 +114,21 @@ TEE客户端API描述并定义了在REE中运行的客户端应该如何与在TE
 + `TEEC_OpenSession`:在CA和指定TA之间打开一个新的会话，并且与TEE Communication IP通信操作id，当返回TEEC_SUCCESS时，说明该IP已经向会话id寄存器写入了一个id
 + `TEEC_InvokeCommand`：在指定的会话中调用命令
 + `TEEC_CloseSession`：关闭会话，清除会话id寄存器中的内容
+
+## TEE Internal Core API
+内部核心API是向在安全区域中运行的TAs公开的API。TEE内部核心API由四个主要部分组成：
++ 数据和密钥的可信存储API
++ 密码操作API
++ 时间API
++ 算数API
+
+# 实用性证明：开源比特币钱包实现
+钱包的实现依靠TEE内部核心API特性：
++ 用于创建随机种子短语的随机数生成
++ 用于保存主密钥的安全存储
++ 用于签署链交易和执行其他加密相关操作的加密元语
+
+## 具体实现
+
+# 评估
 
