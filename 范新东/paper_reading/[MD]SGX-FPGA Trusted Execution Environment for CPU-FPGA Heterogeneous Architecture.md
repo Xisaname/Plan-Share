@@ -77,3 +77,8 @@ SGX-FPGA需要完成两个事情：
 
 ### CPU和FPGA之间密钥的生成
 PUF RTL为密钥生成器
+
+# 实验评估
+## 性能评估
+### 负载测试
+使用了四个程序：K-Means, Smith-Waterman, CNN和Huffman Coding
