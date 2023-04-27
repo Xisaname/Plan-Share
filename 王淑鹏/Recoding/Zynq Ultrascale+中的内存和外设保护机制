@@ -2,8 +2,6 @@
 
 Xilinx外设保护单元(XPPU)和Xilinx内存保护单元(XMPU)验证系统主机是否被明确地允许访问某个地址。
 
-![image-20230426155301545](C:\Users\23170\AppData\Roaming\Typora\typora-user-images\image-20230426155301545.png)
-
 ## 系统内存管理单元（System Memory management unit，SMMU）
 
 ​       **地址转换+隔离服务**   
