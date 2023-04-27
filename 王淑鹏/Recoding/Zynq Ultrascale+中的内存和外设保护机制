@@ -1,0 +1,39 @@
+# Zynq Ultrascale+中的内存和外设保护机制
+
+Xilinx外设保护单元(XPPU)和Xilinx内存保护单元(XMPU)验证系统主机是否被明确地允许访问某个地址。
+
+![image-20230426155301545](C:\Users\23170\AppData\Roaming\Typora\typora-user-images\image-20230426155301545.png)
+
+## 系统内存管理单元（System Memory management unit，SMMU）
+
+​       **地址转换+隔离服务**   
+
+​       地址转换隔离：SMMU为I/O设备提供地址转换，SMMU提供设备隔离功能，防止DMA攻击（内存直接攻击）。    
+
+​       它为I/O设备提供了两阶段的地址转换：第一阶段与运行多个操作系统的系统相关，并由管理程序管理。在这个阶段，虚拟地址被转换成中间物理地址。第二阶段处理在操作系统内运行的应用程序的地址转换。这是通过将中间物理地址转换为物理地址来实现的。
+
+​        SMMU还提供事务过滤，以隔离事务主服务器。
+
+## Xilinx内存保护单元（Xilinx Memory Protection Units，XMPU）
+
+​        **XMPU是一种基于区域的内存保护单元。**
+
+​       **Only secure masters can read/write the XMPU.**
+
+​        8个XMPU与SMMU协同工作，通过隔离提供内存保护（DDR，OCM）。这些单元显式地检查是否允许主机通过内存区域的定义访问给定地址。内存区域由地址范围和允许访问该区域的master列表组成。此外，TrustZone支持在安全世界或正常世界中放置内存区域，这样只有允许的安全master才能访问标记为安全的内存区域。在访问冲突的情况下，XMPU可以通过中断或RRESP/BRESP AXI信号通知主机。
+
+## Xilinx外设保护单元（Xilinx Peripherals Protection Units，XPPU）
+
+​       **XPPU用于保护LPD外设和控制寄存器（SLCR）以及消息缓冲区（IPI）。对这些寄存器的受控访问有助于实现安全性、安全性和操作系统隔离。XPPU位于LPD中，以保护IOP免受错误读写事务的影响。**
+
+​        **XPPU是一个基于查找的外设保护单元。XPPU用于保护外设、消息缓冲区(用于处理器间中断和通信)和Quad-SPI闪存。XPPU也有一个机制来保护对它自己的编程寄存器的访问。**
+
+​      **XPPU使用两种数据结构来控制访问：master ID list、aperture permission list。**
+
+​       XPPU旨在保护外设和配置寄存器。XPPU的用法与XMPU类似，只是内存区域被一组孔径权限列表所取代。更准确地说，这个列表定义了一组外设/配置寄存器地址空间，并标识可以访问这些地址的主机。与xppu一样，xppu支持TrustZone技术，因此可以在Normal World和Secure World之间对外设及其配置寄存器进行分区。当主机不允许访问给定的外设/配置寄存器或通过非安全请求访问安全外设/配置寄存器时，检测到访问冲突。
+
+
+
+注：
+
+Aperture (computer memory)：https://en.wikipedia.org/wiki/Aperture_(computer_memory)
