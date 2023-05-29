@@ -119,4 +119,4 @@ TrustZone技术将所有硬件划分为安全的和不安全的，不安全的�
 ## 寻找FPGA区块链、FPGA神经网络加速等应用，考虑如何分割任务，包括将隐私数据分离，同时考虑性能下降在可容忍的范围内
 ## 分割应用、性能优化
 
-
+[区块链应用](https://github.com/Miraje/TrustZone-backed-Bitcoin-Wallet)
