@@ -8,6 +8,8 @@
     - [Makefile编写结构](#makefile编写结构)
     - [OPTEE-OS的Makefile结构](#optee-os的makefile结构)
       - [optee\_os/Makefile](#optee_osmakefile)
+      - [mk/checkconf.mk](#mkcheckconfmk)
+      - [core/core.mk](#corecoremk)
 
 # 概述
 本文将会记录学习OP-TEE OS（v3.21.0）的组织架构。
@@ -62,3 +64,27 @@ Makefile脚本一般用于处理大型项目的统一编译的问题。不像一
 + `ta/ta.mk` # 用于编译ta的文件
 + `ta/mk/build-user-ta.mk` # 用于编译用户端ta的文件
 + `mk/cleandirs.mk` # 用于make clean的文件
+
+#### mk/checkconf.mk
+该文件定义了一系列的函数，用于生成TEE的配置文件，这些函数为：
++ `check-conf-h`: 创建一个.h的头文件，其中包含TEE的配置信息，这个函数会从MakeFile中获取所有的TEE配置变量，并将这些变量转换为c语言的宏定义，并输出到h文件中。
++ `check-conf-cmake`: 创建一个cmake文件，作用同上。
++ `check-conf-mk`: 创建一个make文件，作用同上。
++ `mv-if-changed`: 比较两个文件的内容是否相同，相同则删除第一个文件；不同则将第一个文件命名为第二个文件。
++ `cfg-vars-by-prefix`: 根据给定的前缀，获取所有以该文件开头的变量。
++ `cfg-make-define`: 将给定的变量转换为C语言的宏定义。
++ `cfg-cmake-set`: 将给定的变量转换为CMake的变量设置。
++ `cfg-one-enabled`: 检查给定的一组变量中是否至少有一个变量的值为'y'
++ `cfg-all-enabled`: 检查给定的一组变量中是否全部变量的值为'y'
++ `cfg-depends-all`: 如果一个变量依赖的变量中至少有一个变量的值为'n'，则将该变量设置为'n'
++ `cfg-depends-one`: 如果一个变量依赖的变量中所有变量的值为'n'，则将该变量设置为'n'
++ `cfg-enable-all-depends`: 将依赖于一个变量的所有变量设置为'y'
++ `cfg-check-value`: 检查变量是否有给定的值，如果不是则发出错误消息。
++ `force`: 将变量设置为给定的值，如果该变量已经被设置为不同的值，则发出错误消息。
+
+#### core/core.mk
+该文件用于编译TEE的核心模块。该文件包含了`cleanvars.mk`文件，然后设置了当前的submodule为core，并包含了相关的配置文件和Makefile文件。接下来，定义了一些变量和标志，例如`cppflags$(sm)`,`cflags$(sm)`,`aflags$(sm)`等。
+
+然后，该文件还定义了一些库，如`utils`、`mbedtls`、`tomcrypt`、`fdt`、`zlib`、`unw`和`scmi-server`等，这些库都是针对TEE的一些特定需求而编写的，例如加密、压缩、调试等。
+
+最后，该文件还包含了一些编译规则，例如compile.mk和link.mk，用于编译和链接TEE核心模块。
