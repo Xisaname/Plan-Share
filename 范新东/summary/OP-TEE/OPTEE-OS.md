@@ -10,6 +10,9 @@
       - [optee\_os/Makefile](#optee_osmakefile)
       - [mk/checkconf.mk](#mkcheckconfmk)
       - [core/core.mk](#corecoremk)
+      - [ldelf/ldelf.mk](#ldelfldelfmk)
+      - [mk/lib.mk](#mklibmk)
+      - [mk/compile.mk](#mkcompilemk)
 
 # 概述
 本文将会记录学习OP-TEE OS（v3.21.0）的组织架构。
@@ -51,6 +54,8 @@ Makefile脚本一般用于处理大型项目的统一编译的问题。不像一
 + 在编写时，使用变量管理Makefile中的各种路径、编译器选项等
 
 ### OPTEE-OS的Makefile结构
+sm: sub moudle是子模块的名称
+
 #### optee_os/Makefile
 该目录是位于optee_os最顶层的编译文件，它是编译opteeos的起始文件。即在要开始编译opteeos时，该文件是最先被调用的。
 
@@ -87,4 +92,87 @@ Makefile脚本一般用于处理大型项目的统一编译的问题。不像一
 
 然后，该文件还定义了一些库，如`utils`、`mbedtls`、`tomcrypt`、`fdt`、`zlib`、`unw`和`scmi-server`等，这些库都是针对TEE的一些特定需求而编写的，例如加密、压缩、调试等。
 
-最后，该文件还包含了一些编译规则，例如compile.mk和link.mk，用于编译和链接TEE核心模块。
+最后，该文件还包含了一些编译规则，例如compile.mk和link.mk，用于编译和链接TEE核心模块，编译规则包括：
++ compile.mk：编译规则文件，用于编译源文件。
++ link.mk：链接规则文件，用于链接目标文件。
+
+**详细描述**
+
+该文件包含了许多include语句，用于包含其他Makefile文件和配置文件。这些文件包括：
++ cleanvars.mk：用于清除变量的Makefile文件。
++ conf.mk：平台配置文件。
++ config.mk：TEE核心模块配置文件。
++ arch/(ARCH)/(ARCH).mk：架构配置文件。
++ crypto.mk：加密库配置文件。
++ lib.mk：库编译规则文件。
++ subdir.mk：子目录编译规则文件。
++ compile.mk：编译规则文件。
++ link.mk：链接规则文件。
+
+这个Makefile文件定义了许多变量和宏，如`sm`、`arch-dir`、`platform-dir`、`cppflags`、`cflags`、`aflags`等。这些变量和宏用于设置编译选项和路径等。
+
++ `sm`: 当前子模块，用于设置编译选项和路径等。
++ `arch-dir`: 架构目录，用于设置架构相关的路径。
++ `platform-dir`: 平台目录，用于设置平台相关的路径。
++ `cppflags`、`cflags`、`aflags`: 编译选项，用于设置编译器的选项，如预编译宏、头文件路径、优化级别等。
+
+这个Makefile文件包含了许多条件语句，如ifeq和ifdef，用于根据配置文件中的选项设置编译选项。这些选项包括：
+
++ CFG_PAGED_USER_TA：是否启用用户空间分页。
++ CFG_WITH_PAGER、CFG_WITH_USER_TA：是否支持页表管理、用户态应用程序等。
++ CFG_SCMI_SCPFW：是否支持系统管理互连协议（SCMI）。
++ CFG_CORE_STACK_PROTECTOR、CFG_CORE_STACK_PROTECTOR_STRONG、CFG_CORE_STACK_PROTECTOR_ALL：是否启用堆栈保护。
++ CFG_CORE_SANITIZE_UNDEFINED、CFG_CORE_SANITIZE_KADDRESS：是否启用未定义行为、内核地址污点分析等。
++ CFG_CORE_DEBUG_CHECK_STACKS：是否启用堆栈检查。
++ CFG_SYSCALL_FTRACE：是否启用系统调用跟踪。
++ CFG_TEE_CORE_LOG_LEVEL：日志级别。
++ CFG_TEE_CORE_MALLOC_DEBUG：是否启用内存调试。
++ CFG_TEE_CORE_DEBUG：是否启用调试模式。
++ CFG_CORE_DYN_SHM、CFG_CORE_RESERVED_SHM：是否启用动态共享内存、保留共享内存等。
++ CFG_CRYPTOLIB_NAME：加密库名称。
++ CFG_CRYPTOLIB_DIR：加密库目录。
++ CFG_CRYPTO_RSASSA_NA1：RSASSA-PKCS1-v1_5签名算法是否支持NA1补丁。
+
+#### ldelf/ldelf.mk
+该文件的作用是编译和链接一个名为ldelf的子模块，同时定义了该子模块所依赖的库和编译选项。
+
+具体来说，该makefile文件完成以下操作：
+
++ 引入清除变量的makefile文件mk/cleanvars.mk；
++ 定义当前子模块的名称和输出目录；
++ 定义当前子模块的编译选项，包括cppflags、cflags和aflags三个选项；
++ 根据核心架构的不同，为当前子模块设置不同的编译选项；
++ 为当前子模块添加额外的编译选项，包括包含conf-file文件、定义TRACE_LEVEL和__LDELF__宏；
++ 定义当前子模块使用的交叉编译器和编译器类型，并引入对应的makefile文件；
++ 定义当前子模块中的多个库，包括库名称、库目录和makefile文件；
++ 定义当前子模块的子目录，并引入对应的makefile文件；
++ 引入编译相关和链接相关的makefile文件，完成编译和链接操作。
+
+#### mk/lib.mk
+该文件是编译的通用文件。
+
+该Makefile文件的作用是编译和链接库文件，生成静态库文件和共享库文件，并设置生成的库文件的路径、依赖关系和清理过程。它还包含了对子目录和源文件的编译规则。该Makefile文件的目的是为了方便管理和构建库文件，使得编译和链接库文件的过程更加自动化和简单化。
+
+该文件定义了下列一系列变量：
++ subdirs：设置为libdir的值，用于在后面的子目录中进行编译。
++ lib-libfile：将输出库文件的路径设置为/(out−dir)/(base-prefix)/(libdir)/lib(libname).a。
++ lib-shlibfile：如果CFG_ULIBS_SHARED为y，则设置共享库文件的路径为/(out−dir)/(base-prefix)/(libdir)/lib(libname).so。
++ lib-shlibstrippedfile：设置剥离后的共享库文件的路径为/(out−dir)/(base-prefix)/(libdir)/lib(libname).stripped.so。
++ lib-shlibtafile：设置共享库文件的TA文件路径为/(out−dir)/(base-prefix)/(libdir)/(libuuid).ta。
++ lib-libuuidln：设置链接到共享库文件的符号链接路径为/(out−dir)/(base-prefix)/(libdir)/(libuuid).elf。
++ lib-needed-so-files：设置依赖的共享库文件的路径。
++ cleanfiles：设置要清除的文件列表。
++ libfiles：设置要生成的库文件列表。
++ libdirs：设置库文件目录列表。
++ libnames：设置库文件名称列表。
++ libdeps：设置库文件依赖列表。
+
+#### mk/compile.mk
+该文件定义了一个函数process_srcs，该函数用于处理源文件并生成相应的编译规则。该函数接受两个参数，分别是源文件列表和编译规则列表。该函数首先将源文件列表中的每个文件添加到objs变量中。然后，它为每个源文件生成一个依赖文件和一个编译命令文件，并将它们添加到cleanfiles变量中。最后，它根据源文件的类型为每个文件生成相应的编译规则。
+
+之后，该文件定义了一个生成汇编代码的函数_gen-asm-defines-file，该函数接受四个参数，分别是.c文件名、.h文件名、输出的.S文件名和附加的依赖项。该函数将为.c文件生成一个.S文件，并将其添加到cleanfiles变量中。它还为.S文件生成一个依赖文件和一个编译命令文件，并将它们添加到cleanfiles变量中。
+
+在生成编译规则时，_gen-asm-defines-file函数使用CC编译器，并使用相应的编译选项。它还使用-fverbose-asm选项生成详细的汇编代码。
+
+该Makefile使用foreach循环调用process_srcs函数来处理所有的源文件，包括srcs、gen-srcs和spec-srcs。这些源文件将编译成objs变量中列出的目标文件。它还指定了conf-file和additional-compile-deps作为所有目标文件的依赖项。
+
