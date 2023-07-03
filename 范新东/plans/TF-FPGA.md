@@ -1,3 +1,30 @@
+目录
+- [TF-FPGA计划](#tf-fpga计划)
+- [工作框架](#工作框架)
+  - [调研](#调研)
+  - [TZ接口的汇总统一](#tz接口的汇总统一)
+- [思维导图](#思维导图)
+  - [TZ端TEE](#tz端tee)
+  - [FPGA端TEE](#fpga端tee)
+  - [TZ和FPGA之间的安全通信](#tz和fpga之间的安全通信)
+- [架构图（截止23.3.28）](#架构图截止23328)
+- [研究思路（23.4.13）](#研究思路23413)
+- [小组汇报（23.5.16）](#小组汇报23516)
+  - [背景](#背景)
+  - [面临的安全威胁](#面临的安全威胁)
+    - [针对CPU端的攻击](#针对cpu端的攻击)
+    - [针对FPGA端的攻击](#针对fpga端的攻击)
+    - [针对CPU-FPGA之间通信的攻击](#针对cpu-fpga之间通信的攻击)
+  - [安全攻击，带论文版](#安全攻击带论文版)
+    - [系统层面](#系统层面)
+    - [硬件层面](#硬件层面)
+  - [系统架构](#系统架构)
+  - [现有的可信执行环境](#现有的可信执行环境)
+  - [将现有的可信执行环境在zcu104开发板上运行](#将现有的可信执行环境在zcu104开发板上运行)
+  - [官方文档](#官方文档)
+  - [寻找FPGA区块链、FPGA神经网络加速等应用，考虑如何分割任务，包括将隐私数据分离，同时考虑性能下降在可容忍的范围内](#寻找fpga区块链fpga神经网络加速等应用考虑如何分割任务包括将隐私数据分离同时考虑性能下降在可容忍的范围内)
+  - [分割应用、性能优化](#分割应用性能优化)
+
 # TF-FPGA计划
 
 在FPGA开发板上基于TrustZone构建可信执行环境，初步规划是构建一个轻量级的TEEOS，类似于[IceClave](https://dl.acm.org/doi/pdf/10.1145/3466752.3480109)。
@@ -72,6 +99,31 @@ Xilinx的Zynq MP开发板是一种基于FPGA技术的开发板，它可以帮助
 ### 针对CPU-FPGA之间通信的攻击
 + 非法访问通信API，窃听、破坏或篡改通信数据。
 + 使用侧信道攻击来监听传输数据。
+
+## 安全攻击，带论文版
+### 系统层面
+|论文名称|介绍|
+|-|:-|
+|Qsee trustzone kernel integer overflow vulnerability|该漏洞通过在安全监控调用(SMC)请求函数中处理整数溢出的失败，成功地在安全世界中执行了非安全代码。|
+|Downgrade Attack on TrustZone|该攻击可以通过软件降级手段来提高自身权限。|
+|JTAG Fault Injection Attack|该攻击利用JTAG测试工具的漏洞来升级自身权限。|
+|Cache Attacks and Rowhammer on ARM|证明了来自非安全世界的rowhammer效应可以用来攻击TrustZone安全世界。|
+|Attack trustzone with rowhammer|通过对动态随机存取存储器(DRAM)中的一行进行特定读取，恢复了存储在RSA签名实现的安全存储器中的私钥。|
+|{CLKSCREW}: Exposing the Perils of Security-Oblivious Energy Management|使用动态电压和频率缩放(DVFS)在安全世界中执行的第七轮AES加密中诱导故障。使用安装在非安全世界中的恶意内核驱动程序来攻击在安全世界中执行的AES。|
+|DFS covert channels on multi-core platforms|基于缓存时间的ARM TrustZone信息泄漏问题。利用Prime和probe缓存攻击，他们成功地恢复了基于t表的AES软件实现的全密钥。|
+|ARMageddon: Cache Attacks on Mobile Devices|基于缓存的ARM攻击|
+|Return-Oriented Flush-Reload Side Channels on ARM and Their Implications for Android Devices|基于缓存的ARM攻击|
+|AutoLock: Why Cache Attacks on {ARM} Are Harder Than You Think|基于缓存的ARM攻击|
+
+### 硬件层面
+|论文名称|介绍|
+|-|:-|
+|How TrustZone Could Be Bypassed: Side-Channel Attacks on a Modern System-on-Chip|使用相关功率分析(CPA)成功地攻击了AES加密。他们还利用模板攻击成功地攻击了经过验证的PIN算法。|
+|Electromagnetic security tests for SoC|故障注入攻击。在AES计算过程中对ARM加密加速器和保证模块(CAAM)进行了局部电磁注入。|
+|Controlling PC on ARM Using Fault Injection|使用电源故障和激光束注入来攻击安全启动，避开安全过程(加载码认证)。|
+|Laser-Induced Fault Injection on Smartphone Bypassing the Secure Boot|使用电源故障和激光束注入来攻击安全启动，避开安全过程(加载码认证)。|
+|How to Break Secure Boot on FPGA SoCs Through Malicious Hardware|展示了恶意IP如何访问处理器核心功能和内存，以绕过软件或系统安全(如安全启动)|
+|On the security evaluation of the ARM TrustZone extension in a heterogeneous SoC|首次提出了恶意硬件的修改，利用FPGA结构中的安全故障来绕过ARM核心安全|
 
 ## 系统架构
 为了保护Zynq MP中的隐私数据，我们设计了一种基于ARM TrustZone的可信执行环境架构TZ-FPGA。在PS端，我们设计了一种可信的执行环境，将其分为安全世界和非安全世界。一种应用程序在PS端被拆分为安全部分和非安全部分，将普通代码、数据存放在非安全世界执行；将隐私数据和代码放到安全世界。
