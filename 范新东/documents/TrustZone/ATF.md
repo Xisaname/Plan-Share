@@ -1,36 +1,66 @@
 目录
 - [ATF(Arm Trusted Firmware)](#atfarm-trusted-firmware)
+- [HighLevel](#highlevel)
+	- [ATF是什么](#atf是什么)
+	- [ATF由哪些组件构成](#atf由哪些组件构成)
 - [BL1](#bl1)
-  - [bl1\_entrypoint](#bl1_entrypoint)
-  - [el3\_entrypoint\_common](#el3_entrypoint_common)
-  - [bl1\_early\_patform\_setup](#bl1_early_patform_setup)
-  - [bl\_main](#bl_main)
-  - [bl1\_prepare\_next\_image](#bl1_prepare_next_image)
-  - [BL1 to BL2](#bl1-to-bl2)
+	- [bl1\_entrypoint](#bl1_entrypoint)
+	- [el3\_entrypoint\_common](#el3_entrypoint_common)
+	- [bl1\_early\_patform\_setup](#bl1_early_patform_setup)
+	- [bl\_main](#bl_main)
+	- [bl1\_prepare\_next\_image](#bl1_prepare_next_image)
+	- [BL1 to BL2](#bl1-to-bl2)
 - [BL2](#bl2)
-  - [bl2\_entrypoint](#bl2_entrypoint)
-  - [bl2\_main](#bl2_main)
-  - [bl2\_load\_images](#bl2_load_images)
-  - [REGISTER\_BL\_IMAGE\_DESCS(bl2\_mem\_params\_descs)](#register_bl_image_descsbl2_mem_params_descs)
-  - [BL2 to BL3](#bl2-to-bl3)
+	- [bl2\_entrypoint](#bl2_entrypoint)
+	- [bl2\_main](#bl2_main)
+	- [bl2\_load\_images](#bl2_load_images)
+	- [REGISTER\_BL\_IMAGE\_DESCS(bl2\_mem\_params\_descs)](#register_bl_image_descsbl2_mem_params_descs)
+	- [BL2 to BL3](#bl2-to-bl3)
 - [BL31](#bl31)
-  - [bl31\_entrypoint](#bl31_entrypoint)
-  - [bl31\_main](#bl31_main)
-  - [runtime\_svc\_init](#runtime_svc_init)
-  - [DECLARE\_RT\_SVC](#declare_rt_svc)
-  - [BL31 to BL32](#bl31-to-bl32)
-    - [OPTEE OS实现](#optee-os实现)
+	- [bl31\_entrypoint](#bl31_entrypoint)
+	- [bl31\_main](#bl31_main)
+	- [runtime\_svc\_init](#runtime_svc_init)
+	- [DECLARE\_RT\_SVC](#declare_rt_svc)
+	- [BL31 to BL32](#bl31-to-bl32)
+		- [OPTEE OS实现](#optee-os实现)
 - [BL32](#bl32)
-  - [opteed\_setup](#opteed_setup)
-  - [opteed\_init](#opteed_init)
-  - [opteed\_enter\_sp](#opteed_enter_sp)
-  - [BL32 to BL 33](#bl32-to-bl-33)
+	- [opteed\_setup](#opteed_setup)
+	- [opteed\_init](#opteed_init)
+	- [opteed\_enter\_sp](#opteed_enter_sp)
+	- [BL32 to BL 33](#bl32-to-bl-33)
 # ATF(Arm Trusted Firmware)
 ATF（ARM Trusted Firmware）是一针对ARM芯片给出的底层的开源固件代码。固件将整个系统分成四种运行等级，分别为：EL0,EL1,EL2,EL3，并规定了每个安全等级中运行的Image名字。
 
 [ATF源代码地址](https://github.com/ARM-software/arm-trusted-firmware)
 
 本文将介绍在ARM芯片冷启动时ATF的具体运行过程以及各层级之间的跳转过程。
+
+# HighLevel
+首先先总结ATF是什么？它由哪些组件构成？每个组件的作用又是什么？各个组件之间的关系是怎样的？各个组件的安全性到底如何？
+
+## ATF是什么
+在ATF出现之前，一个计算机启动的流程通常是由存储在非易失性存储器中的代码进行最开始的初始化，之后加载并将控制权交给更大的镜像，去负责更复杂功能的初始化，这样一步一步按照顺序最终加载我们熟悉的操作系统以及应用程序。
+
+整个启动过程像是一个信息传递的过程。但是信息在其中是以明文方式存储的，随着信息安全三要素：机密性、完整性以及可用性的提出，传递明文信息的各个引导流程逐渐变得危险起来。
+
+首先，明文信息无法达到机密性的要求。
+其次，信息在整个传递过程中甚至是在存储阶段就已经遭到修改，但是整个引导启动过程还是将其当做正常程序执行，显然让恶意程序有机可乘，严重危害系统安全。
+最后，在引导过程中，如何对已经启动过的程序进行保护，使得这些程序不受攻击的影响而正常工作，这就是信息的可用性。
+显然，普通的启动流程无法满足信息安全三要素。
+
+ATF的作用就是解决上述启动过程中的安全问题。
+
+首先，它将最开始进行初始化的代码存储到芯片中的ROM内，外界难以访问，并且不能修改。
+其次，在引导过程中，每一个引导阶段，在加载下一段引导程序时验证其完整性。
+最后，在引导加载后，它提供运行时的安全防护，保证在受到攻击时整个计算机也能正常运行。
+
+可以看到ATF重构了计算机启动的流程。但是，上层启动流程并没有改变，因此ATF实现了与之前引导流程一样的API，供上层调用。
+
+## ATF由哪些组件构成
+
+
+
+
 # BL1
 BL1是系统上电之后第一批启动的层。在其启动之前，上电后会首先运行SCP boot ROM，这个是存在片上的ROM程序，是信任链的起始点，默认无条件安全。之后会跳转到ATF的BL1中继续执行。
 
