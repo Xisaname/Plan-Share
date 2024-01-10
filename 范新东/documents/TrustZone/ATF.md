@@ -418,7 +418,6 @@ void bl1_prepare_next_image(unsigned int image_id)
 			   DISABLE_ALL_EXCEPTIONS);
 		}
 	}
- 
 	/* Allow platform to make change */
 	bl1_plat_set_ep_info(image_id, next_bl_ep);
  
